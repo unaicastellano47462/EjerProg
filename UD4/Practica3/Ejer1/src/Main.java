@@ -24,7 +24,7 @@ public class Main {
         boolean salir = false;
 
         do {
-            System.out.println("\n--- Menu Biblioteca ---");
+            System.out.println("Menu Biblioteca ---");
             System.out.println("1. Alquilar libro");
             System.out.println("2. Devolver libro");
             System.out.println("3. Ver datos disponibles");
