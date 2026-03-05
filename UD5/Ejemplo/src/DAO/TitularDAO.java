@@ -127,7 +127,7 @@ public class TitularDAO {
         return null;
     }
 
-    public ArrayList<Titular>  buscarPorNombre(String nombre) {
+    public ArrayList<Titular> buscarPorNombre(String nombre) {
         String sql = "SELECT * FROM titulares WHERE nombre = ?";
 
         try {
