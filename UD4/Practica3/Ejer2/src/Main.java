@@ -122,7 +122,7 @@ public class Main {
                     continue;
                 }
                 m.setVeterinario(v);
-                v.getMascotas().add(m);  // CORRECCIÓN: agregamos directamente a la lista
+                v.getMascotas().add(m);
             }
         }
     }
