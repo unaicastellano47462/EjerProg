@@ -1,7 +1,6 @@
 package DAO;
 
-
-import Modelo.*;
+import Modelo.Vuelo;
 import Utilidades.DBConnection;
 
 import java.sql.*;
@@ -10,179 +9,170 @@ import java.util.List;
 
 public class VueloDAO {
 
-    public void insertar(Vuelo vuelo){
-        String sql = "INSERT INTO vuelos (fecha_salida, destino, procedencia) VALUES (?, ?, ?)";
-
+    public boolean insertar(Vuelo vuelo) {
+        String sql = "INSERT INTO vuelos (cod_vuelo, fecha_salida, destino, procedencia) VALUES (?, ?, ?, ?)";
         try {
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
 
-            ps.setDate(1, (Date) vuelo.getFecha_salida());
-            ps.setString(2, vuelo.getDestino());
-            ps.setString(3, vuelo.getProcedencia());
-            ps.executeUpdate();
+            ps.setString(1, vuelo.getCod_vuelo());
+            ps.setDate(2, new java.sql.Date(vuelo.getFecha_salida().getTime()));
+            ps.setString(3, vuelo.getDestino());
+            ps.setString(4, vuelo.getProcedencia());
 
-            System.out.println("Registro insertado exitosamente");
-            DBConnection.closeConnection();
-        } catch (Exception e)
-        {
+            int filasAfectadas = ps.executeUpdate();
+            return filasAfectadas > 0;
+
+        } catch (Exception e) {
             System.out.println("Error al insertar el vuelo: " + e.getMessage());
+            return false;
+        } finally {
+            DBConnection.closeConnection();
         }
     }
 
-    public int borrar(int cod_vuelo) throws Exception {
+    public int borrar(String cod_vuelo) throws Exception {
         String sql = "DELETE FROM vuelos WHERE cod_vuelo = ?";
-
-        int n=0;
+        int n = 0;
         try {
-
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
-
-            ps.setInt(1, cod_vuelo);
+            ps.setString(1, cod_vuelo);
             n = ps.executeUpdate();
 
             if (n != 1) {
-                System.out.println("Error al borrar el vuelo");
-                throw new Exception("No se encontró ningún vuelo con el código proporcionado.");
-            }
-            else
-            {
-                System.out.println("Vuelo borrado correctamente.");
+                System.out.println("No se encontró ningún vuelo con el código proporcionado.");
+            } else {
+                System.out.println("Vuelo borrado correctamente en la base de datos.");
             }
         } catch (Exception e) {
             System.out.println("Error al borrar el vuelo: " + e.getMessage());
-        }
-        finally {
+            throw e;
+        } finally {
             DBConnection.closeConnection();
-            return n;
         }
+        return n;
     }
 
-    public Vuelo buscarPorCodigo(int cod_vuelo) {
+    public Vuelo buscarPorCodigo(String cod_vuelo) {
         String sql = "SELECT * FROM vuelos WHERE cod_vuelo = ?";
-
+        Vuelo vueloEncontrado = null;
         try {
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
-
-            ps.setInt(1, cod_vuelo);
+            ps.setString(1, cod_vuelo);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return new Vuelo(
-                        rs.getInt("cod_vuelo"),
+                vueloEncontrado = new Vuelo(
+                        rs.getString("cod_vuelo"),
                         rs.getDate("fecha_salida"),
                         rs.getString("destino"),
                         rs.getString("procedencia")
                 );
-            } DBConnection.closeConnection();
-        } catch (Exception e)
-        {
+            }
+        } catch (Exception e) {
             System.out.println("Error al buscar el vuelo: " + e.getMessage());
+        } finally {
+            DBConnection.closeConnection();
         }
-        return null;
+        return vueloEncontrado;
     }
 
     public Vuelo buscarPorDestino(String destino) {
         String sql = "SELECT * FROM vuelos WHERE destino = ?";
-
+        Vuelo vueloEncontrado = null;
         try {
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
-
             ps.setString(1, destino);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return new Vuelo(
-                        rs.getInt("cod_vuelo"),
+                vueloEncontrado = new Vuelo(
+                        rs.getString("cod_vuelo"),
                         rs.getDate("fecha_salida"),
                         rs.getString("destino"),
                         rs.getString("procedencia")
                 );
-            } DBConnection.closeConnection();
-        } catch (Exception e)
-        {
+            }
+        } catch (Exception e) {
             System.out.println("Error al buscar el vuelo por destino: " + e.getMessage());
+        } finally {
+            DBConnection.closeConnection();
         }
-        return null;
+        return vueloEncontrado;
     }
 
     public Vuelo buscarPorProcedencia(String procedencia) {
         String sql = "SELECT * FROM vuelos WHERE procedencia = ?";
-
+        Vuelo vueloEncontrado = null;
         try {
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
-
             ps.setString(1, procedencia);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return new Vuelo(
-                        rs.getInt("cod_vuelo"),
+                vueloEncontrado = new Vuelo(
+                        rs.getString("cod_vuelo"),
                         rs.getDate("fecha_salida"),
                         rs.getString("destino"),
                         rs.getString("procedencia")
                 );
-            } DBConnection.closeConnection();
-        } catch (Exception e)
-        {
+            }
+        } catch (Exception e) {
             System.out.println("Error al buscar el vuelo por procedencia: " + e.getMessage());
+        } finally {
+            DBConnection.closeConnection();
         }
-        return null;
+        return vueloEncontrado;
     }
 
-    public ArrayList<Vuelo> buscarPorFecha(Date fecha_salida) {
-        String sql = "SELECT * FROM vuelos WHERE fecha_salida = ?";
-        
+    public ArrayList<Vuelo> listarPorFecha() {
+        String sql = "SELECT * FROM vuelos ORDER BY fecha_salida ASC";
+        ArrayList<Vuelo> vuelos = new ArrayList<>();
+
         try {
             Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-
-            ps.setDate(1, fecha_salida);
-            ResultSet rs = ps.executeQuery();
-
-            ArrayList<Vuelo> vuelos = new ArrayList<>();
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
 
             while (rs.next()) {
                 vuelos.add(new Vuelo(
-                        rs.getInt("cod_vuelo"),
+                        rs.getString("cod_vuelo"),
                         rs.getDate("fecha_salida"),
                         rs.getString("destino"),
                         rs.getString("procedencia")
                 ));
             }
+        } catch (Exception e) {
+            System.out.println("Error al listar los vuelos por fecha: " + e.getMessage());
+        } finally {
             DBConnection.closeConnection();
-            return vuelos;
         }
-        catch (Exception e)
-        {
-            System.out.println("Error al buscar el vuelo por fecha: " + e.getMessage());
-        }
-        return null;
+        return vuelos;
     }
 
-    public void modificar(Vuelo vuelo) {
+    public boolean modificar(Vuelo vuelo) {
         String sql = "UPDATE vuelos SET fecha_salida = ?, destino = ?, procedencia = ? WHERE cod_vuelo = ?";
-
         try {
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
 
-            ps.setDate(1, (Date) vuelo.getFecha_salida());
+            ps.setDate(1, new java.sql.Date(vuelo.getFecha_salida().getTime()));
             ps.setString(2, vuelo.getDestino());
             ps.setString(3, vuelo.getProcedencia());
-            ps.setInt(4, vuelo.getCod_vuelo());
-            ps.executeUpdate();
+            ps.setString(4, vuelo.getCod_vuelo());
 
-            System.out.println("Registro modificado exitosamente");
-            DBConnection.closeConnection();
+            int filasAfectadas = ps.executeUpdate();
+            return filasAfectadas > 0;
 
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("Error al modificar el vuelo: " + e.getMessage());
+            return false;
+        } finally {
+            DBConnection.closeConnection();
         }
     }
 
@@ -190,23 +180,43 @@ public class VueloDAO {
         List<Vuelo> lista = new ArrayList<>();
         String sql = "SELECT * FROM vuelos";
 
-        try (Connection conn = DBConnection.getConnection();
-             Statement st = conn.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+        try {
+            Connection conn = DBConnection.getConnection();
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
 
             while (rs.next()) {
                 lista.add(new Vuelo(
-                        rs.getInt("cod_vuelo"),
+                        rs.getString("cod_vuelo"),
                         rs.getDate("fecha_salida"),
                         rs.getString("destino"),
                         rs.getString("procedencia")
                 ));
             }
+        } catch (Exception e) {
+            System.out.println("Error al listar los vuelos: " + e.getMessage());
+        } finally {
             DBConnection.closeConnection();
         }
-        catch (Exception e) {
-            System.out.println("Error al listar los vuelos: " + e.getMessage());
-        }
         return lista;
+    }
+
+    public String obtenerUltimoCodigo() {
+        String sql = "SELECT MAX(cod_vuelo) AS ultimo FROM vuelos WHERE cod_vuelo LIKE 'AEA1-%'";
+        String ultimoCodigo = null;
+        try {
+            Connection conn = DBConnection.getConnection();
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            if (rs.next()) {
+                ultimoCodigo = rs.getString("ultimo");
+            }
+        } catch (Exception e) {
+            System.out.println("Error al obtener el último código: " + e.getMessage());
+        } finally {
+            DBConnection.closeConnection();
+        }
+        return ultimoCodigo;
     }
 }
