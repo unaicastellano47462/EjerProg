@@ -36,3 +36,4 @@
 ::1 - - [12/Mar/2026:10:13:37 +0100] "GET /phpmyadmin/themes/pmahomme/img/b_browse.png HTTP/1.1" 304 -
 ::1 - - [12/Mar/2026:10:13:37 +0100] "POST /phpmyadmin/index.php?route=/navigation&ajax_request=1 HTTP/1.1" 200 2055
 ::1 - - [12/Mar/2026:10:13:37 +0100] "GET /phpmyadmin/themes/pmahomme/img/b_minus.png HTTP/1.1" 304 -
+::1 - - [12/Mar/2026:10:37:32 +0100] "POST /phpmyadmin/index.php?route=/ HTTP/1.1" 200 1605
