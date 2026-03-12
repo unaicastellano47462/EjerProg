@@ -1,7 +1,8 @@
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 import Utilidades.DBConnection;
-import Vista.MenuTitulares;
+import Vista.MenuBanco;
+import Vista.MenuTitular;
 import jakarta.persistence.EntityManagerFactory;
 
 
@@ -15,7 +16,7 @@ public class Main {
         con el modelo.
          */
 
-        MenuTitulares menu = new MenuTitulares();
+        MenuBanco menu = new MenuBanco();
         menu.mostrarMenu();
     }
 }
